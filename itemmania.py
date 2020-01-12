@@ -191,9 +191,9 @@ if __name__ == '__main__':
     title = ""
     description = ""
 
-    wi = WriteInfo('', '', title, description, '')
+    wi = WriteInfo('', '', title, description, '10')
 
-    im = Itemmania(wi, '', '')
+    im = Itemmania('', '', wi)
     im.login()
     #im.add_list('', '', '')
     #im.add_list('', '', '')
