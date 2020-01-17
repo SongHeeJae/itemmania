@@ -58,6 +58,16 @@ class Itemmania:
         self.driver.get('https://www.itemmania.com/portal/user/p_login_form.html')
         self.driver.implicitly_wait(3)
 
+        self.popup()
+
+        self.driver.find_element_by_id('user_id').send_keys(self.user_id)
+        self.driver.find_element_by_id('user_password').send_keys(self.user_password)
+        self.driver.execute_script('login_security()')
+        sleep(3)
+
+        pass
+
+    def popup(self):
         handle = self.driver.window_handles
 
         # 팝업창 처리
@@ -66,13 +76,7 @@ class Itemmania:
                 self.driver.close()
 
         self.driver.switch_to.window(handle[0])
-
-        self.driver.find_element_by_id('user_id').send_keys(self.user_id)
-        self.driver.find_element_by_id('user_password').send_keys(self.user_password)
-        self.driver.execute_script('login_security()')
-        sleep(3)
-
-        pass
+        
 
     def write_buy(self) : # 구매 등록글 작성
 
@@ -122,12 +126,11 @@ class Itemmania:
 
         self.driver.find_element_by_id('ok_btn').click()
         sleep(2)
-        #handle = self.driver.window_handles
-        #if len(handle) > 1:
-             #   self.driver.switch_to.window(handle[1])
-            #    sleep(1)
+
+        self.driver.find_element(By.XPATH, '//img[@alt="확인"]').click()
+        sleep(1)
         self.driver.find_element(By.XPATH, '//img[@src="http://img3.itemmania.com/new_images/btn/btn_pop_ok_g.gif"]').click()
-       # self.driver.switch_to.window(handle[0])
+  
         sleep(3)
 
         pass
@@ -162,16 +165,21 @@ class Itemmania:
 
         for i in range(max):
             first = datetime.datetime.now()
-            try :
-                for k in update_list.keys():
+            for k in update_list.keys():
+                try:
                     self.driver.execute_script('reInsert("' + update_list[k][i] + '")')
                     Alert(self.driver).accept()
                     sleep(1)
                     Alert(self.driver).accept()
                     sleep(3)
-            except Exception as e:
-                print(e)
-                pass
+                except IndexError:
+                    pass
+                except Exception: # 팝업 오류
+                    self.driver.get('http://www.itemmania.com/myroom/buy/buy_regist.html')
+                    self.driver.implicitly_wait(3)
+                    self.popup()
+                    print('오류.. refresh')
+                    pass
 
             end = datetime.datetime.now()
             
@@ -188,15 +196,43 @@ class Itemmania:
 
 if __name__ == '__main__':
 
-    title = ""
-    description = ""
+    title = "제목입력하세요"
+    description = "글 내용 입력하세요 줄바꿈하려면 \\n"
 
-    wi = WriteInfo('', '', title, description, '10')
+    # 최소구매액, 최대구매액, 제목, 내용, 등록개수
+    wi = WriteInfo('2', '300', title, description, '8')
 
-    im = Itemmania('', '', wi)
-    im.login()
-    #im.add_list('', '', '')
-    #im.add_list('', '', '')
-    #im.write_buy()
-    im.update()
+
+    id = ['아이디1', '아이디2']
+    pw = ['비밀번호1', '비밀번호2']
+
+    for i in range(2) :
+        im = Itemmania(id[i], pw[i], wi)
+        im.login()
+        im.update()
+
+
+    # 재등록은 아래 방식
+
+    """
+
+    # 서버, 가격, 캐릭터명 추가
+    im.add_list('서버명', '가격', '캐릭터명')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    im.add_list('', '', '')
+    
+    im.write_buy() # 글 작성 시작
+    
+    """
+    
+    
     
